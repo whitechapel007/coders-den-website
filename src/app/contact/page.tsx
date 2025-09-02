@@ -6,9 +6,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
   EnvelopeIcon,
-  MapPinIcon,
   ChatBubbleLeftRightIcon,
-  PhoneIcon,
   GlobeAltIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";

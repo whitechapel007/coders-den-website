@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Metadata } from "next";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";

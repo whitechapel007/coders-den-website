@@ -57,8 +57,6 @@ export default function QuizPage() {
     "javascript" | "python" | null
   >(null);
   const [quizData, setQuizData] = useState<QuizData | null>(null);
-  const [registrationData, setRegistrationData] =
-    useState<RegistrationData | null>(null);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
 
   // Generate fresh quiz when track is selected or quiz is retaken
@@ -90,7 +88,6 @@ export default function QuizPage() {
   };
 
   const handleRegistrationComplete = (data: RegistrationData) => {
-    setRegistrationData(data);
     // Here you would typically send data to Google Sheets
     console.log("Quiz Data:", quizData);
     console.log("Registration Data:", data);

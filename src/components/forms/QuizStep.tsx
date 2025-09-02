@@ -1,123 +1,128 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Quiz, QuizQuestion } from '@/types'
+import { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Quiz, QuizQuestion } from "@/types";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline'
-import { cn } from '@/lib/utils'
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
+import { cn } from "@/lib/utils";
 
 interface QuizStepProps {
-  quiz: Quiz
-  onComplete: (data: { answers: Record<string, unknown>, score: number, timeSpent: number }) => void
-  onBack: () => void
+  quiz: Quiz;
+  onComplete: (data: {
+    answers: Record<string, unknown>;
+    score: number;
+    timeSpent: number;
+  }) => void;
+  onBack: () => void;
 }
 
 export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, unknown>>({})
-  const [timeLeft, setTimeLeft] = useState(quiz.timeLimit ? quiz.timeLimit * 60 : 0) // Convert to seconds
-  const [startTime] = useState(Date.now())
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, unknown>>({});
+  const [timeLeft, setTimeLeft] = useState(
+    quiz.timeLimit ? quiz.timeLimit * 60 : 0
+  ); // Convert to seconds
+  const [startTime] = useState(Date.now());
 
-  const currentQuestion = quiz.questions[currentQuestionIndex]
-  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1
-  const hasAnswer = answers[currentQuestion.id] !== undefined
+  const currentQuestion = quiz.questions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
+  const hasAnswer = answers[currentQuestion.id] !== undefined;
+
+  const calculateScore = useCallback(() => {
+    let correct = 0;
+    quiz.questions.forEach((question) => {
+      const userAnswer = answers[question.id];
+      if (userAnswer === question.correctAnswer) {
+        correct++;
+      }
+    });
+    return Math.round((correct / quiz.questions.length) * 100);
+  }, [answers, quiz.questions]);
+
+  const handleSubmitQuiz = useCallback(() => {
+    const score = calculateScore();
+    const timeSpent = Math.round((Date.now() - startTime) / 1000 / 60); // Convert to minutes
+    onComplete({ answers, score, timeSpent });
+  }, [answers, startTime, onComplete, calculateScore]);
 
   // Timer effect
   useEffect(() => {
-    if (timeLeft <= 0) return
+    if (timeLeft <= 0) return;
 
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
-          handleSubmitQuiz()
-          return 0
+          handleSubmitQuiz();
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [timeLeft])
+    return () => clearInterval(timer);
+  }, [timeLeft, handleSubmitQuiz]);
 
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
   const handleAnswerSelect = (answer: unknown) => {
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
-      [currentQuestion.id]: answer
-    }))
-  }
-
-  const calculateScore = () => {
-    let correct = 0
-    quiz.questions.forEach(question => {
-      const userAnswer = answers[question.id]
-      if (userAnswer === question.correctAnswer) {
-        correct++
-      }
-    })
-    return Math.round((correct / quiz.questions.length) * 100)
-  }
-
-  const handleSubmitQuiz = () => {
-    const score = calculateScore()
-    const timeSpent = Math.round((Date.now() - startTime) / 1000 / 60) // Convert to minutes
-    onComplete({ answers, score, timeSpent })
-  }
+      [currentQuestion.id]: answer,
+    }));
+  };
 
   const nextQuestion = () => {
     if (isLastQuestion) {
-      handleSubmitQuiz()
+      handleSubmitQuiz();
     } else {
-      setCurrentQuestionIndex(prev => prev + 1)
+      setCurrentQuestionIndex((prev) => prev + 1);
     }
-  }
+  };
 
   const prevQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1)
+      setCurrentQuestionIndex((prev) => prev - 1);
     }
-  }
+  };
 
   const renderCodeSnippet = (code: string) => {
     return (
       <div className="bg-muted rounded-lg p-4 my-4 font-mono text-sm overflow-x-auto">
         <pre className="text-foreground">{code}</pre>
       </div>
-    )
-  }
+    );
+  };
 
   const renderQuestion = (question: QuizQuestion) => {
     // Simple markdown-like parsing for code blocks
-    const parts = question.question.split('```')
+    const parts = question.question.split("```");
     const questionContent = parts.map((part, index) => {
       if (index % 2 === 1) {
         // This is a code block
-        const lines = part.split('\n')
-        const language = lines[0] // First line might contain language
-        const code = lines.slice(1).join('\n')
-        return renderCodeSnippet(code)
+        const lines = part.split("\n");
+        const code = lines.slice(1).join("\n");
+        return renderCodeSnippet(code);
       } else {
         // Regular text
-        return <span key={index}>{part}</span>
+        return <span key={index}>{part}</span>;
       }
-    })
+    });
 
-    return <div className="whitespace-pre-wrap">{questionContent}</div>
-  }
+    return <div className="whitespace-pre-wrap">{questionContent}</div>;
+  };
 
   const renderAnswerOptions = (question: QuizQuestion) => {
-    if (question.type === 'multiple-choice') {
+    if (question.type === "multiple-choice") {
       return (
         <div className="space-y-3">
           {question.options?.map((option, index) => (
@@ -125,19 +130,21 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
               key={index}
               onClick={() => handleAnswerSelect(index)}
               className={cn(
-                'w-full text-left p-4 rounded-lg border-2 transition-all duration-200',
+                "w-full text-left p-4 rounded-lg border-2 transition-all duration-200",
                 answers[question.id] === index
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border hover:border-primary/50 hover:bg-muted/50"
               )}
             >
               <div className="flex items-center space-x-3">
-                <div className={cn(
-                  'flex items-center justify-center w-6 h-6 rounded-full border-2 text-sm font-semibold',
-                  answers[question.id] === index
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-muted-foreground'
-                )}>
+                <div
+                  className={cn(
+                    "flex items-center justify-center w-6 h-6 rounded-full border-2 text-sm font-semibold",
+                    answers[question.id] === index
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted-foreground"
+                  )}
+                >
                   {String.fromCharCode(65 + index)} {/* A, B, C, D */}
                 </div>
                 <span className="flex-1">{option}</span>
@@ -145,60 +152,66 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
             </button>
           ))}
         </div>
-      )
+      );
     }
 
-    if (question.type === 'true-false') {
+    if (question.type === "true-false") {
       return (
         <div className="space-y-3">
-          {['true', 'false'].map((option) => (
+          {["true", "false"].map((option) => (
             <button
               key={option}
               onClick={() => handleAnswerSelect(option)}
               className={cn(
-                'w-full text-left p-4 rounded-lg border-2 transition-all duration-200',
+                "w-full text-left p-4 rounded-lg border-2 transition-all duration-200",
                 answers[question.id] === option
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border hover:border-primary/50 hover:bg-muted/50"
               )}
             >
               <div className="flex items-center space-x-3">
-                <div className={cn(
-                  'flex items-center justify-center w-6 h-6 rounded-full border-2 text-sm font-semibold',
-                  answers[question.id] === option
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-muted-foreground'
-                )}>
-                  {option === 'true' ? 'T' : 'F'}
+                <div
+                  className={cn(
+                    "flex items-center justify-center w-6 h-6 rounded-full border-2 text-sm font-semibold",
+                    answers[question.id] === option
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted-foreground"
+                  )}
+                >
+                  {option === "true" ? "T" : "F"}
                 </div>
                 <span className="flex-1 capitalize">{option}</span>
               </div>
             </button>
           ))}
         </div>
-      )
+      );
     }
 
-    return null
-  }
+    return null;
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     const colors = {
-      'easy': 'text-green-600 bg-green-100',
-      'medium': 'text-yellow-600 bg-yellow-100',
-      'hard': 'text-red-600 bg-red-100'
-    }
-    return colors[difficulty as keyof typeof colors] || 'text-gray-600 bg-gray-100'
-  }
+      easy: "text-green-600 bg-green-100",
+      medium: "text-yellow-600 bg-yellow-100",
+      hard: "text-red-600 bg-red-100",
+    };
+    return (
+      colors[difficulty as keyof typeof colors] || "text-gray-600 bg-gray-100"
+    );
+  };
 
   const getTechStackColor = (techStack: string) => {
     const colors = {
-      'javascript': 'text-yellow-700 bg-yellow-100',
-      'python': 'text-blue-700 bg-blue-100',
-      'general': 'text-purple-700 bg-purple-100'
-    }
-    return colors[techStack as keyof typeof colors] || 'text-gray-700 bg-gray-100'
-  }
+      javascript: "text-yellow-700 bg-yellow-100",
+      python: "text-blue-700 bg-blue-100",
+      general: "text-purple-700 bg-purple-100",
+    };
+    return (
+      colors[techStack as keyof typeof colors] || "text-gray-700 bg-gray-100"
+    );
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -217,10 +230,12 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
         {quiz.timeLimit && (
           <div className="flex items-center space-x-2 text-sm">
             <ClockIcon className="h-4 w-4" />
-            <span className={cn(
-              'font-mono',
-              timeLeft < 300 ? 'text-red-600' : 'text-muted-foreground'
-            )}>
+            <span
+              className={cn(
+                "font-mono",
+                timeLeft < 300 ? "text-red-600" : "text-muted-foreground"
+              )}
+            >
               {formatTime(timeLeft)}
             </span>
           </div>
@@ -231,7 +246,11 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
       <div className="w-full bg-muted rounded-full h-2 mb-8">
         <div
           className="bg-primary h-2 rounded-full transition-all duration-300"
-          style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+          style={{
+            width: `${
+              ((currentQuestionIndex + 1) / quiz.questions.length) * 100
+            }%`,
+          }}
         />
       </div>
 
@@ -244,22 +263,27 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
             </CardTitle>
           </div>
           <div className="flex items-center space-x-2 mt-4">
-            <span className={cn(
-              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-              getDifficultyColor(currentQuestion.difficulty)
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                getDifficultyColor(currentQuestion.difficulty)
+              )}
+            >
               {currentQuestion.difficulty}
             </span>
-            <span className={cn(
-              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-              getTechStackColor(currentQuestion.techStack)
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                getTechStackColor(currentQuestion.techStack)
+              )}
+            >
               {currentQuestion.techStack}
             </span>
           </div>
         </CardHeader>
         <CardContent>
-          {currentQuestion.codeSnippet && renderCodeSnippet(currentQuestion.codeSnippet)}
+          {currentQuestion.codeSnippet &&
+            renderCodeSnippet(currentQuestion.codeSnippet)}
           {renderAnswerOptions(currentQuestion)}
         </CardContent>
       </Card>
@@ -282,12 +306,12 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
               <div
                 key={index}
                 className={cn(
-                  'w-3 h-3 rounded-full',
+                  "w-3 h-3 rounded-full",
                   index === currentQuestionIndex
-                    ? 'bg-primary'
+                    ? "bg-primary"
                     : answers[quiz.questions[index].id] !== undefined
-                      ? 'bg-green-500'
-                      : 'bg-muted'
+                    ? "bg-green-500"
+                    : "bg-muted"
                 )}
               />
             ))}
@@ -297,7 +321,7 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
         <Button
           onClick={nextQuestion}
           disabled={!hasAnswer}
-          className={isLastQuestion ? 'bg-green-600 hover:bg-green-700' : ''}
+          className={isLastQuestion ? "bg-green-600 hover:bg-green-700" : ""}
         >
           {isLastQuestion ? (
             <>
@@ -315,8 +339,9 @@ export function QuizStep({ quiz, onComplete, onBack }: QuizStepProps) {
 
       {/* Answer Summary (mobile) */}
       <div className="sm:hidden mt-6 text-center text-sm text-muted-foreground">
-        {Object.keys(answers).length} of {quiz.questions.length} questions answered
+        {Object.keys(answers).length} of {quiz.questions.length} questions
+        answered
       </div>
     </div>
-  )
+  );
 }
