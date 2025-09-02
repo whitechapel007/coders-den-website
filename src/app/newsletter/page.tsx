@@ -1,13 +1,14 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { subscribeToNewsletter, ApiError } from '@/lib/api-client'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { subscribeToNewsletter, ApiError } from "@/lib/api-client";
 import {
   EnvelopeIcon,
   CheckCircleIcon,
@@ -15,41 +16,45 @@ import {
   BookOpenIcon,
   UserGroupIcon,
   BriefcaseIcon,
-} from '@heroicons/react/24/outline'
+} from "@heroicons/react/24/outline";
 
 const newsletterSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-})
+  email: z.string().email("Please enter a valid email address"),
+});
 
-type NewsletterFormData = z.infer<typeof newsletterSchema>
+type NewsletterFormData = z.infer<typeof newsletterSchema>;
 
 const benefits = [
   {
     icon: BookOpenIcon,
-    title: 'Weekly Tutorials',
-    description: 'Get the latest coding tutorials and best practices delivered to your inbox.',
+    title: "Weekly Tutorials",
+    description:
+      "Get the latest coding tutorials and best practices delivered to your inbox.",
   },
   {
     icon: BriefcaseIcon,
-    title: 'Career Tips',
-    description: 'Exclusive career advice, job opportunities, and interview preparation tips.',
+    title: "Career Tips",
+    description:
+      "Exclusive career advice, job opportunities, and interview preparation tips.",
   },
   {
     icon: UserGroupIcon,
-    title: 'Community Updates',
-    description: 'Stay updated on community events, workshops, and networking opportunities.',
+    title: "Community Updates",
+    description:
+      "Stay updated on community events, workshops, and networking opportunities.",
   },
   {
     icon: SparklesIcon,
-    title: 'Exclusive Content',
-    description: 'Access to subscriber-only resources, templates, and coding challenges.',
+    title: "Exclusive Content",
+    description:
+      "Access to subscriber-only resources, templates, and coding challenges.",
   },
-]
+];
 
 export default function NewsletterPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -58,32 +63,32 @@ export default function NewsletterPage() {
     reset,
   } = useForm<NewsletterFormData>({
     resolver: zodResolver(newsletterSchema),
-  })
+  });
 
   const onSubmit = async (data: NewsletterFormData) => {
-    setIsSubmitting(true)
-    setSubmitError(null)
+    setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       await subscribeToNewsletter({
         email: data.email,
-        source: 'newsletter-page',
-      })
-      
-      setIsSubscribed(true)
-      reset()
+        source: "newsletter-page",
+      });
+
+      setIsSubscribed(true);
+      reset();
     } catch (error) {
-      console.error('Error subscribing to newsletter:', error)
-      
+      console.error("Error subscribing to newsletter:", error);
+
       if (error instanceof ApiError) {
-        setSubmitError(error.message)
+        setSubmitError(error.message);
       } else {
-        setSubmitError('Failed to subscribe. Please try again.')
+        setSubmitError("Failed to subscribe. Please try again.");
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (isSubscribed) {
     return (
@@ -96,15 +101,17 @@ export default function NewsletterPage() {
                 Welcome to the Community!
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                Thank you for subscribing to our newsletter. You'll receive your first email soon with the latest tutorials and community updates.
+                Thank you for subscribing to our newsletter. You&apos;ll receive
+                your first email soon with the latest tutorials and community
+                updates.
               </p>
               <div className="space-y-4">
                 <Button asChild>
-                  <a href="/blog">Explore Our Blog</a>
+                  <Link href="/blog">Explore Our Blog</Link>
                 </Button>
                 <div>
                   <Button variant="outline" asChild>
-                    <a href="/">Back to Home</a>
+                    <Link href="/">Back to Home</Link>
                   </Button>
                 </div>
               </div>
@@ -112,7 +119,7 @@ export default function NewsletterPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -122,13 +129,14 @@ export default function NewsletterPage() {
         <div className="mx-auto max-w-2xl text-center">
           <EnvelopeIcon className="h-16 w-16 text-primary mx-auto mb-6" />
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-            Stay{' '}
+            Stay{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Connected
             </span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Join thousands of developers who get weekly tutorials, career tips, and community updates delivered straight to their inbox.
+            Join thousands of developers who get weekly tutorials, career tips,
+            and community updates delivered straight to their inbox.
           </p>
         </div>
 
@@ -155,14 +163,16 @@ export default function NewsletterPage() {
         <div className="mx-auto mt-16 max-w-xl">
           <Card>
             <CardHeader>
-              <CardTitle className="text-center">Subscribe to Our Newsletter</CardTitle>
+              <CardTitle className="text-center">
+                Subscribe to Our Newsletter
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <Input
                   label="Email Address"
                   type="email"
-                  {...register('email')}
+                  {...register("email")}
                   error={errors.email?.message}
                   placeholder="your.email@example.com"
                   leftIcon={<EnvelopeIcon className="h-5 w-5" />}
@@ -180,11 +190,12 @@ export default function NewsletterPage() {
                   className="w-full"
                   size="lg"
                 >
-                  {isSubmitting ? 'Subscribing...' : 'Subscribe Now'}
+                  {isSubmitting ? "Subscribing..." : "Subscribe Now"}
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  We respect your privacy. Unsubscribe at any time. No spam, ever.
+                  We respect your privacy. Unsubscribe at any time. No spam,
+                  ever.
                 </p>
               </form>
             </CardContent>
@@ -215,7 +226,9 @@ export default function NewsletterPage() {
                 How often will I receive emails?
               </h3>
               <p className="text-muted-foreground">
-                We send one newsletter per week, typically on Tuesdays. You'll also receive occasional updates about special events or important community announcements.
+                We send one newsletter per week, typically on Tuesdays.
+                You&apos;ll also receive occasional updates about special events
+                or important community announcements.
               </p>
             </div>
             <div>
@@ -223,7 +236,9 @@ export default function NewsletterPage() {
                 What type of content will I receive?
               </h3>
               <p className="text-muted-foreground">
-                Our newsletters include coding tutorials, career advice, community spotlights, upcoming events, job opportunities, and curated resources from around the web.
+                Our newsletters include coding tutorials, career advice,
+                community spotlights, upcoming events, job opportunities, and
+                curated resources from around the web.
               </p>
             </div>
             <div>
@@ -231,12 +246,14 @@ export default function NewsletterPage() {
                 Can I unsubscribe anytime?
               </h3>
               <p className="text-muted-foreground">
-                Absolutely! Every email includes an unsubscribe link. You can also manage your subscription preferences or pause emails temporarily.
+                Absolutely! Every email includes an unsubscribe link. You can
+                also manage your subscription preferences or pause emails
+                temporarily.
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
