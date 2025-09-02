@@ -92,6 +92,7 @@ export async function appendToSheet(
     });
 
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(`Failed to append data to sheet ${sheetName}:`, error);
 
@@ -136,6 +137,7 @@ export async function ensureSheetHeaders(sheetName: string, headers: string[]) {
     if (!response.data.values || response.data.values.length === 0) {
       await appendToSheet(sheetName, [headers]);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(`Failed to ensure headers for sheet ${sheetName}:`, error);
 
