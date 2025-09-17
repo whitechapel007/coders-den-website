@@ -1,3 +1,5 @@
+import type { StaticImageData } from "next/image";
+
 export interface Member {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ export interface Member {
 export interface Testimonial {
   id: string;
   memberId: string;
-  member: Pick<Member, "name" | "avatar" | "role">;
+  member: Pick<Member, "name" | "role"> & { avatar: string | StaticImageData };
   content: string;
   rating: number;
   category: "skill-improvement" | "job-placement" | "community" | "mentorship";
