@@ -18,9 +18,9 @@ export const testimonials: Testimonial[] = [
   },
   {
     id: '2',
-    memberId: 'marcus-johnson',
+    memberId: 'john-areola',
     member: {
-      name: 'Marcus Johnson',
+      name: 'John Areola',
       avatar: '/avatars/marcus-johnson.jpg',
       role: 'member'
     },
