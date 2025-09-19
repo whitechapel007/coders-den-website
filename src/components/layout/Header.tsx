@@ -1,143 +1,124 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/Button'
-import { cn } from '@/lib/utils'
-
-const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Events', href: '/events' },
-  { name: 'Testimonials', href: '/testimonials' },
-  { name: 'Blog', href: '/blog' },
-  { name: 'Contact', href: '/contact' },
-]
+import Link from "next/link";
+import { useState } from "react";
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
+import logo from '../../assets/Coders_den_logo.png';
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const pathname = usePathname()
+  const [nav, setNav] = useState<boolean>(false);
+  const pathname = usePathname();
+
+  const handleNav = () => setNav(!nav);
+  const CloseNav = () => setNav(false);
+
+  const navigation = [
+    { name: 'Home', href: '/', icon: 'fa-solid fa-house-chimney' },
+    { name: 'About', href: '/about', icon: 'fa-solid fa-circle-question' },
+    { name: 'Events', href: '/events', icon: 'fa-solid fa-circle-info' },
+    { name: 'Testimonials', href: '/testimonials', icon: 'fa-solid fa-hospital' },
+    { name: 'Blog', href: '/blog', icon: 'fa-solid fa-blog' },
+    { name: 'Contact', href: '/contact', icon: 'fa-solid fa-right-to-bracket' },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-        <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Coders Den</span>
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CD</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Coders Den
-              </span>
-            </div>
-          </Link>
+    <div className="lg:px-15 md:px-10 px-3">
+      {/* Mobile nav */}
+      <div className="lg:hidden pb-3">
+      <div className="flex justify-between items-center w-full mt-3">
+        <div className="flex items-center gap-3">
+        <Link href="/">
+          <img src={logo.src} alt="logo" className="w-[100px]" />
+        </Link>
         </div>
-        
-        <div className="flex lg:hidden">
-          <button
-            type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <span className="sr-only">Open main menu</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-          </button>
+        <button
+        type="button"
+        className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
+        onClick={handleNav}
+        >
+        <span className="sr-only">Open main menu</span>
+        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+        </button>
+      </div>
+      {/* Overlay */}
+      {nav && (
+        <div className="fixed inset-0 z-[9998] backdrop-blur-sm"></div>
+      )}
+      {/* Mobile Nav */}
+      <div
+        className={cn(
+        "fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-slate-900/95 backdrop-blur-[2px] transition-transform duration-700 ease-out p-2",
+        nav ? "-translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="flex justify-between items-center w-full text-white">
+        <Link href="/">
+          <img src={logo.src} alt="logo" className="w-[100px]" />
+        </Link>
+        <button
+          type="button"
+          className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
+          onClick={handleNav}
+        >
+          <span className="sr-only">Close main menu</span>
+          <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+        </button>
         </div>
-        
-        <div className="hidden lg:flex lg:gap-x-12">
+        <div className="mt-10">
+        <ul className="flex flex-col text-white">
+          <hr className="opacity-20" />
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                'text-sm font-semibold leading-6 transition-colors hover:text-primary',
-                pathname === item.href 
-                  ? 'text-primary' 
-                  : 'text-foreground'
-              )}
-            >
-              {item.name}
+          <div key={item.name}>
+            <li className="p-3" onClick={CloseNav}>
+            <Link href={item.href} className="flex items-center hover:text-primary">
+              <i className={`${item.icon} mr-3`}></i>
+              <h3>{item.name}</h3>
             </Link>
+            </li>
+            <hr className="opacity-20" />
+          </div>
           ))}
-        </div>
-        
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/quiz">Take Quiz</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/quiz">Join Now</Link>
-          </Button>
-        </div>
-      </nav>
-      
-      {/* Mobile menu */}
-      <div className={cn(
-        'lg:hidden',
-        mobileMenuOpen ? 'fixed inset-0 z-50' : 'hidden'
-      )}>
-        <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border/10">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-              <span className="sr-only">Coders Den</span>
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">CD</span>
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Coders Den
-                </span>
-              </div>
-            </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 text-foreground"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-          
-          <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-border/10">
-              <div className="space-y-2 py-6">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      '-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-muted',
-                      pathname === item.href 
-                        ? 'text-primary bg-muted' 
-                        : 'text-foreground'
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-              <div className="py-6 space-y-4">
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/quiz" onClick={() => setMobileMenuOpen(false)}>
-                    Take Quiz
-                  </Link>
-                </Button>
-                <Button className="w-full" asChild>
-                  <Link href="/quiz" onClick={() => setMobileMenuOpen(false)}>
-                    Join Now
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
+        </ul>
         </div>
       </div>
-    </header>
-  )
+      </div>
+
+      {/* Desktop nav */}
+      <div className="hidden lg:flex lg:text-sm items-center w-full">
+      <div className="w-1/4">
+        <Link href="/">
+        <img src={logo.src} alt="logo" className="w-[100px]" />
+        </Link>
+      </div>
+      <div className="hidden lg:flex lg:gap-x-12">
+        {navigation.map((item) => (
+        <Link
+          key={item.name}
+          href={item.href}
+          className={cn(
+          'text-sm font-semibold leading-6 transition-colors hover:text-primary',
+          pathname === item.href
+            ? 'text-primary'
+            : 'text-foreground'
+          )}
+        >
+          {item.name}
+        </Link>
+        ))}
+      </div>
+
+      <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
+        <Button variant="outline" size="sm" asChild>
+        <Link href="/quiz">Take Quiz</Link>
+        </Button>
+        <Button size="sm" asChild>
+        <Link href="/quiz">Join Now</Link>
+        </Button>
+      </div>
+      </div>
+    </div>
+  );
 }
